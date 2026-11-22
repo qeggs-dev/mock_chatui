@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title data-zh="聊天记录工坊 · OneBot 12" data-en="Chatlog Studio · OneBot 12">聊天记录工坊 · OneBot 12</title>
+<link rel="stylesheet" href="css/shell.css">
+</head>
+<body>
+
+<header class="shell-top">
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="21" height="21" fill="none">
+        <path d="M4 6.2A2.2 2.2 0 0 1 6.2 4h11.6A2.2 2.2 0 0 1 20 6.2v7.6a2.2 2.2 0 0 1-2.2 2.2H10l-4.6 3.1a.6.6 0 0 1-.94-.5V16H6.2A2.2 2.2 0 0 1 4 13.8V6.2Z" fill="currentColor"/>
+        <circle cx="8.6" cy="9.8" r="1.1" fill="#0b84ff"/>
+        <circle cx="12" cy="9.8" r="1.1" fill="#0b84ff"/>
+        <circle cx="15.4" cy="9.8" r="1.1" fill="#0b84ff"/>
+      </svg>
+    </span>
+    <span class="brand-text">
+      <span class="brand-name" data-zh="聊天记录工坊" data-en="Chatlog Studio">聊天记录工坊</span>
+      <span class="brand-sub" data-zh="Chatlog Studio" data-en="Local chat composer">Chatlog Studio</span>
+    </span>
+  </a>
+  <div class="shell-actions">
+    <span class="pill"><span class="pill-dot"></span><span data-zh="纯本地 · OneBot 12" data-en="Fully local · OneBot 12">纯本地 · OneBot 12</span></span>
+    <div class="lang-seg" role="group" data-zh-aria="语言" data-en-aria="Language" aria-label="语言">
+      <button type="button" data-action="set-lang" data-lang="zh">中文</button>
+      <button type="button" data-action="set-lang" data-lang="en">English</button>
+    </div>
+  </div>
+</header>
+
+<main class="shell-main">
+  <section class="hero">
+    <div class="eyebrow">CHATLOG STUDIO / 01</div>
+    <h1><span data-zh="把一段对话，" data-en="Turn a conversation">把一段对话，</span><br><em data-zh="排成一张聊天记录。" data-en="into a chat log.">排成一张聊天记录。</em></h1>
+    <p class="lede" data-zh="选好角色，直接打字编排；需要图片、表情、语音或引用时，再打开详细编辑。所有角色、消息和素材只留在本机浏览器里，最后导出成 PNG。" data-en="Pick a character and just type; open the detailed editor when you need images, faces, voice or quotes. Every character, message and asset stays in this browser, and you export the result as a PNG.">选好角色，直接打字编排；需要图片、表情、语音或引用时，再打开详细编辑。所有角色、消息和素材只留在本机浏览器里，最后导出成 PNG。</p>
+    <div class="hero-meta">
+      <span data-zh="纯本地存储" data-en="Local storage only">纯本地存储</span>
+      <span data-zh="OneBot 12 结构" data-en="OneBot 12 structure">OneBot 12 结构</span>
+      <span data-zh="Canvas 导出 PNG" data-en="Canvas PNG export">Canvas 导出 PNG</span>
+    </div>
+  </section>
+
+  <section class="cards">
+    <a class="page-card" href="chat.html">
+      <div class="card-top">
+        <span class="card-num">01 / CHAT</span>
+        <span class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none">
+            <path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-4 3v-3.2A2 2 0 0 1 4 14V6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M8 8h8M8 11.5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+      </div>
+      <h2 data-zh="聊天页" data-en="Chat page">聊天页</h2>
+      <p data-zh="像聊天一样直接编排：输入框左侧选角色，打字发送就是一条消息。长按输入框进入全屏详细编辑，右上角菜单打开角色池，左上角返回键打开设置侧栏。" data-en="Compose like a chat: pick a character on the left of the input, then type and send. Long-press the input for full-screen detailed editing, open the character pool from the top-right menu, and open the settings drawer with the top-left back button.">像聊天一样直接编排：输入框左侧选角色，打字发送就是一条消息。长按输入框进入全屏详细编辑，右上角菜单打开角色池，左上角返回键打开设置侧栏。</p>
+      <span class="card-link"><span data-zh="打开聊天页" data-en="Open chat page">打开聊天页</span> <span aria-hidden="true">→</span></span>
+    </a>
+
+    <a class="page-card" href="editor.html">
+      <div class="card-top">
+        <span class="card-num">02 / EDIT</span>
+        <span class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none">
+            <rect x="3.5" y="4" width="17" height="16" rx="2.2" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M3.5 9.5h17M9.5 9.5V20" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M12.5 13h5M12.5 16h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+      </div>
+      <h2 data-zh="编辑页" data-en="Editor page">编辑页</h2>
+      <p data-zh="桌面工作台：左侧是聊天页展示，右侧是角色池与详细编辑器。拖角色到聊天页可直接插入消息，点任意消息逐段编辑 OneBot 12 消息段。" data-en="Desktop workspace: the chat preview on the left, the character pool and detailed editor on the right. Drag a character into the chat to insert a message, or click any message to edit its OneBot 12 segments.">桌面工作台：左侧是聊天页展示，右侧是角色池与详细编辑器。拖角色到聊天页可直接插入消息，点任意消息逐段编辑 OneBot 12 消息段。</p>
+      <span class="card-link"><span data-zh="打开编辑页" data-en="Open editor page">打开编辑页</span> <span aria-hidden="true">→</span></span>
+    </a>
+  </section>
+
+  <section class="status" aria-live="polite">
+    <div class="status-left">
+      <div class="status-eyebrow" data-zh="当前本地记录" data-en="Current local record">当前本地记录</div>
+      <div class="status-title" id="status-title" data-zh="读取中…" data-en="Loading…">读取中…</div>
+      <div class="status-meta" id="status-meta" data-zh="数据只保存在这个浏览器里。" data-en="Data is stored only in this browser.">数据只保存在这个浏览器里。</div>
+    </div>
+    <div class="status-stats" id="status-stats"></div>
+  </section>
+</main>
+
+<footer class="shell-foot">
+  <span data-zh="聊天记录工坊 · v1.0" data-en="Chatlog Studio · v1.0">聊天记录工坊 · v1.0</span>
+  <span data-zh="数据不上传 · 换浏览器前请先导出 JSON 备份" data-en="Nothing is uploaded · Export a JSON backup before switching browsers">数据不上传 · 换浏览器前请先导出 JSON 备份</span>
+</footer>
+
+<script src="js/i18n.js"></script>
+<script>
+(function () {
+  'use strict';
+  var tr = function (zh, en, vars) { return CM.i18n.tr(zh, en, vars); };
+  var KEY = 'mock_chatui:dataset:v1';
+  var LEGACY_KEY = 'chatlog-mock:dataset:v1';
+  var data = null;
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (!raw) raw = localStorage.getItem(LEGACY_KEY);
+    if (raw) {
+      if (!localStorage.getItem(KEY)) {
+        try { localStorage.setItem(KEY, raw); } catch (e) {}
+      }
+      data = JSON.parse(raw);
+    }
+  } catch (e) {}
+
+  function fmtBytes(n) {
+    if (!n) return '—';
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1024 / 1024).toFixed(2) + ' MB';
+  }
+  function fmtDate(v) {
+    if (!v) return tr('未知', 'Unknown');
+    var d = new Date(v);
+    if (isNaN(d.getTime())) return tr('未知', 'Unknown');
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') +
+      ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  function renderStatus() {
+    var title = document.getElementById('status-title');
+    var meta = document.getElementById('status-meta');
+    var stats = document.getElementById('status-stats');
+    if (!title || !meta || !stats) return;
+
+    if (!data || !Array.isArray(data.sessions) || !data.sessions.length) {
+      title.textContent = tr('还没有本地记录', 'No local records yet');
+      meta.textContent = tr(
+        '打开任一页面，会自动生成一份示例聊天记录；之后所有修改都会保存在本机。',
+        'Open either page to generate a demo chat log automatically; all changes are then saved on this device.'
+      );
+      stats.innerHTML = '';
+      return;
+    }
+
+    var messages = 0;
+    var events = 0;
+    data.sessions.forEach(function (s) {
+      var list = s.events || [];
+      events += list.length;
+      list.forEach(function (e) {
+        if (e.type === 'message') messages++;
+      });
+    });
+    var chars = (data.characters || []).length;
+    var bytes = 0;
+    try {
+      bytes = new Blob([JSON.stringify(data)]).size;
+    } catch (e) {}
+
+    if (data.sessions.length === 1) {
+      title.textContent = data.sessions[0].title || tr('未命名会话', 'Untitled chat');
+    } else {
+      title.textContent = tr('共 {n} 个会话', '{n} sessions', { n: data.sessions.length });
+    }
+    var type = data.settings && data.settings.platform === 'wechat'
+      ? tr('微信样式', 'WeChat style')
+      : tr('QQ 样式', 'QQ style');
+    meta.textContent = type + ' · ' + tr('最后修改 {time}', 'Last modified {time}', { time: fmtDate(data.updatedAt) });
+    stats.innerHTML =
+      '<span><b>' + messages + '</b> ' + tr('条消息', 'messages') + '</span>' +
+      '<span><b>' + events + '</b> ' + tr('个事件', 'events') + '</span>' +
+      '<span><b>' + chars + '</b> ' + tr('个角色', 'characters') + '</span>' +
+      '<span><b>' + fmtBytes(bytes) + '</b> ' + tr('本地占用', 'storage used') + '</span>';
+  }
+
+  renderStatus();
+  document.addEventListener('DOMContentLoaded', function () {
+    // i18n applies static markup on DOMContentLoaded; refresh dynamic status
+    // afterwards so its data-zh/data-en placeholders do not win.
+    CM.i18n.apply();
+    renderStatus();
+  });
+  CM.i18n.onChange(function () {
+    CM.i18n.apply();
+    renderStatus();
+  });
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-action="set-lang"]');
+    if (btn) CM.i18n.set(btn.getAttribute('data-lang'));
+  });
+})();
+</script>
+</body>
+</html>

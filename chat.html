@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title data-zh="聊天页面 · 聊天记录工坊" data-en="Chat page · Chatlog Studio">聊天页面 · 聊天记录工坊</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-page="chat">
+
+<header class="topbar">
+  <a class="brand" href="index.html" data-zh-title="返回工作台" data-en-title="Back to workspace" title="返回工作台">
+    <div class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+        <path d="M4 6.2A2.2 2.2 0 0 1 6.2 4h11.6A2.2 2.2 0 0 1 20 6.2v7.6a2.2 2.2 0 0 1-2.2 2.2H10l-4.6 3.1a.6.6 0 0 1-.94-.5V16H6.2A2.2 2.2 0 0 1 4 13.8V6.2Z" fill="currentColor"/>
+        <circle cx="8.6" cy="9.8" r="1.1" fill="#0b84ff"/>
+        <circle cx="12" cy="9.8" r="1.1" fill="#0b84ff"/>
+        <circle cx="15.4" cy="9.8" r="1.1" fill="#0b84ff"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <div class="brand-name" data-zh="聊天记录工坊" data-en="Chatlog Studio">聊天记录工坊</div>
+      <div class="brand-sub" data-zh="OneBot 12 · 数据只留在本机" data-en="OneBot 12 · Data stays on this device">OneBot 12 · 数据只留在本机</div>
+    </div>
+  </a>
+
+  <div class="top-actions">
+    <div class="segctl" role="group" data-zh-aria="平台样式" data-en-aria="Platform style" aria-label="平台样式">
+      <button type="button" data-action="set-platform" data-platform="qq">QQ</button>
+      <button type="button" data-action="set-platform" data-platform="wechat" data-zh="微信" data-en="WeChat">微信</button>
+    </div>
+    <button type="button" class="icon-btn" id="mode-toggle" data-action="toggle-mode" data-zh-title="切换浅色 / 深色" data-en-title="Toggle light / dark" data-zh-aria="切换浅色或深色" data-en-aria="Toggle light or dark mode" title="切换浅色 / 深色" aria-label="切换浅色或深色">
+      <span id="mode-icon">☾</span>
+    </button>
+    <div class="top-divider" aria-hidden="true"></div>
+    <button type="button" class="icon-btn" data-action="undo" data-zh-title="撤销" data-en-title="Undo" data-zh-aria="撤销" data-en-aria="Undo" title="撤销" aria-label="撤销">↶</button>
+    <button type="button" class="icon-btn" data-action="redo" data-zh-title="重做" data-en-title="Redo" data-zh-aria="重做" data-en-aria="Redo" title="重做" aria-label="重做">↷</button>
+    <button type="button" class="icon-btn" data-action="open-drawer" data-zh-title="聊天设置" data-en-title="Chat settings" data-zh-aria="聊天设置" data-en-aria="Chat settings" title="聊天设置" aria-label="聊天设置">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" aria-hidden="true">
+        <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M19.4 13.5c.1-.5.1-1 0-1.5l1.4-1.1-1.6-2.8-1.7.6c-.4-.4-.8-.7-1.3-.9L15.9 6h-3.2l-.3 1.8c-.5.2-.9.5-1.3.9l-1.7-.6-1.6 2.8L9.2 12c-.1.5-.1 1 0 1.5l-1.4 1.1 1.6 2.8 1.7-.6c.4.4.8.7 1.3.9l.3 1.8h3.2l.3-1.8c.5-.2.9-.5 1.3-.9l1.7.6 1.6-2.8-1.4-1.1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button type="button" class="btn btn-dark" data-action="open-export">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true">
+        <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span data-zh="导出图片" data-en="Export image">导出图片</span>
+    </button>
+  </div>
+</header>
+
+<main class="workspace">
+  <section class="panel stage">
+    <div class="phone" id="phone" data-platform="qq" data-mode="light">
+      <div class="phone-body">
+        <header class="chat-header" id="chat-header">
+          <div class="statusbar">
+            <span class="sb-time" id="sb-time">22:41</span>
+            <span class="sb-icons" aria-hidden="true">
+              <svg class="sb-ico" viewBox="0 0 18 12">
+                <rect x="0" y="8" width="3" height="4" rx="1"/>
+                <rect x="5" y="5.5" width="3" height="6.5" rx="1"/>
+                <rect x="10" y="3" width="3" height="9" rx="1"/>
+                <rect x="15" y="0" width="3" height="12" rx="1"/>
+              </svg>
+              <svg class="sb-ico" viewBox="0 0 16 12">
+                <path d="M1 4.2a10.5 10.5 0 0 1 14 0M3.6 6.8a6.6 6.6 0 0 1 8.8 0M6.2 9.3a2.8 2.8 0 0 1 3.6 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <circle cx="8" cy="11" r="1" fill="currentColor"/>
+              </svg>
+              <svg class="sb-ico" viewBox="0 0 26 12">
+                <rect x="1" y="1" width="20" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".45"/>
+                <rect x="3" y="3" width="13" height="6" rx="1.5" fill="currentColor"/>
+                <rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".45"/>
+              </svg>
+            </span>
+          </div>
+          <div class="titlebar">
+            <button type="button" class="title-btn" data-action="open-drawer" data-zh-aria="打开聊天设置" data-en-aria="Open chat settings" aria-label="打开聊天设置">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+                <path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="title-main" data-action="open-drawer" data-zh-title="打开聊天设置" data-en-title="Open chat settings" title="打开聊天设置">
+              <div class="title-text" id="chat-title">—</div>
+              <div class="title-sub" id="chat-sub"></div>
+            </div>
+            <button type="button" class="title-btn" data-action="open-pool" data-zh-aria="打开角色池" data-en-aria="Open character pool" aria-label="打开角色池">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <circle cx="5" cy="12" r="1.8"/>
+                <circle cx="12" cy="12" r="1.8"/>
+                <circle cx="19" cy="12" r="1.8"/>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="phone-screen" id="phone-screen">
+          <div class="canvas-wrap" id="canvas-wrap">
+            <canvas id="preview-canvas" data-zh-aria="聊天记录预览" data-en-aria="Chat preview" aria-label="聊天记录预览"></canvas>
+            <div class="drop-line" id="drop-line" hidden></div>
+          </div>
+        </div>
+
+        <div class="composer" id="composer">
+          <button type="button" class="role-btn" id="role-btn" data-action="toggle-role-pop" data-zh-aria="选择发送角色" data-en-aria="Choose sending character" aria-label="选择发送角色">
+            <span class="role-avatar" id="role-avatar">🐈</span>
+            <svg class="role-caret" viewBox="0 0 10 6" aria-hidden="true">
+              <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="composer-input-wrap">
+            <textarea id="composer-input" rows="1" data-zh-placeholder="输入消息…" data-en-placeholder="Type a message…" placeholder="输入消息…" autocomplete="off" spellcheck="false"></textarea>
+          </div>
+          <button type="button" class="composer-detail" data-action="detailed-compose" data-zh-title="详细编辑（也可长按输入框）" data-en-title="Detailed edit (or long-press the input)" data-zh-aria="详细编辑" data-en-aria="Detailed edit" title="详细编辑（也可长按输入框）" aria-label="详细编辑">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true">
+              <path d="M5 7h14M5 12h9M5 17h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="18.6" cy="12" r="1.5" fill="currentColor"/>
+            </svg>
+          </button>
+          <button type="button" class="composer-send" data-action="send-message" data-zh="发送" data-en="Send">发送</button>
+          <div class="role-pop" id="role-pop" hidden></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage-foot">
+      <span class="hint" data-zh="点击消息详细编辑 · 长按输入框插入消息段 · 拖角色直接插入" data-en="Click a message to edit · Long-press the input to add segments · Drag a character to insert">点击消息详细编辑 · 长按输入框插入消息段 · 拖角色直接插入</span>
+      <span class="foot-meta">
+        <span id="preview-meta">390 × 0</span>
+        <span id="save-status" class="save-status" data-zh="正在载入…" data-en="Loading…">正在载入…</span>
+      </span>
+    </div>
+  </section>
+
+  <section class="panel pool-panel" id="pool-panel" data-zh-aria="角色池" data-en-aria="Character pool" aria-label="角色池">
+    <div class="panel-head">
+      <div>
+        <div class="eyebrow" data-zh="角色池" data-en="Character pool">角色池</div>
+        <div class="panel-title" data-zh="拖到聊天页插入" data-en="Drag into the chat to insert">拖到聊天页插入</div>
+      </div>
+      <div class="panel-actions">
+        <button type="button" class="btn btn-sm" data-action="new-character" data-zh="+ 角色" data-en="+ Character">+ 角色</button>
+        <button type="button" class="icon-btn sm only-narrow" data-action="close-pool" data-zh-aria="关闭角色池" data-en-aria="Close character pool" aria-label="关闭角色池">×</button>
+      </div>
+    </div>
+    <div id="character-pool" class="pool-grid"></div>
+    <div class="panel-foot" data-zh="点角色设为输入身份 · 铅笔编辑资料" data-en="Click a character to set your identity · Pencil to edit profile">点角色设为输入身份 · 铅笔编辑资料</div>
+  </section>
+
+  <section class="panel detail-panel" id="detail-panel" data-zh-aria="详细编辑器" data-en-aria="Detailed editor" aria-label="详细编辑器">
+    <div class="sheet-bar only-narrow">
+      <button type="button" class="icon-btn sm" data-action="close-detail" data-zh-aria="关闭详细编辑" data-en-aria="Close detailed editor" aria-label="关闭详细编辑">×</button>
+      <div class="sheet-title" data-zh="详细编辑" data-en="Detailed edit">详细编辑</div>
+      <div class="sheet-spacer"></div>
+    </div>
+    <div id="detail-head" class="detail-head"></div>
+    <div id="detail-body" class="detail-scroll"></div>
+  </section>
+</main>
+
+<div class="drawer-backdrop" id="drawer-backdrop" data-action="close-drawer"></div>
+<aside class="drawer" id="drawer" data-zh-aria="聊天设置" data-en-aria="Chat settings" aria-label="聊天设置">
+  <div class="drawer-head">
+    <div>
+      <div class="drawer-title" data-zh="聊天设置" data-en="Chat settings">聊天设置</div>
+      <div class="drawer-sub" id="drawer-sub" data-zh="只保存在本机" data-en="Stored on this device only">只保存在本机</div>
+    </div>
+    <button type="button" class="icon-btn" data-action="close-drawer" data-zh-aria="关闭设置" data-en-aria="Close settings" aria-label="关闭设置">×</button>
+  </div>
+  <div class="drawer-scroll" id="drawer-body"></div>
+</aside>
+<div class="sheet-backdrop" id="sheet-backdrop" data-action="close-sheets"></div>
+
+<div id="toast" class="toast" hidden></div>
+<dialog id="modal" class="modal" data-zh-aria="对话框" data-en-aria="Dialog" aria-label="对话框"></dialog>
+<input type="file" id="file-input" hidden>
+
+<script src="js/i18n.js"></script>
+<script src="js/demo-assets.js"></script>
+<script src="js/core.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

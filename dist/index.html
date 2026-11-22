@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title data-zh="聊天记录工坊 · OneBot 12" data-en="Chatlog Studio · OneBot 12">聊天记录工坊 · OneBot 12</title>
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+:root {
+  --ink: #14171c;
+  --muted: #6f7784;
+  --faint: #98a0ac;
+  --line: #e3e8ef;
+  --accent: #0b84ff;
+  --font: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", "Segoe UI", system-ui, sans-serif;
+}
+body {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 13px;
+  background:
+    radial-gradient(1100px 540px at 52% -12%, #e7f1ff 0, rgba(231, 241, 255, 0) 62%),
+    radial-gradient(800px 420px at 100% 20%, #f3f7ff 0, rgba(243, 247, 255, 0) 60%),
+    linear-gradient(180deg, #fbfcfd 0%, #f2f5f9 100%);
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(#d5dfeb 1px, transparent 1px);
+  background-size: 30px 30px;
+  opacity: .5;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 72%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 72%);
+}
+a { color: inherit; }
+
+.shell-top {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.brand-mark {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: 11px;
+  color: #fff;
+  background: linear-gradient(145deg, #2a9bff, #0067d6);
+  box-shadow: 0 4px 10px -3px rgba(11, 132, 255, .55), inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+.brand-text { display: flex; flex-direction: column; gap: 1px; }
+.brand-name { font-size: 14.5px; font-weight: 700; letter-spacing: -.01em; }
+.brand-sub { font-size: 9.5px; color: var(--faint); letter-spacing: .14em; text-transform: uppercase; }
+.pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .72);
+  font-size: 10.5px;
+  color: #5f6b7a;
+  white-space: nowrap;
+}
+.pill-dot { width: 6px; height: 6px; border-radius: 50%; background: #2bb673; box-shadow: 0 0 0 3px rgba(43, 182, 115, .13); }
+.shell-actions { display: flex; align-items: center; gap: 10px; }
+.lang-seg {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .72);
+}
+.lang-seg button {
+  height: 26px; padding: 0 10px;
+  border: 0; border-radius: 999px;
+  background: transparent;
+  color: #5f6b7a;
+  font: inherit; font-size: 10.5px; font-weight: 650;
+  cursor: pointer;
+}
+.lang-seg button.active { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(16, 24, 40, .12); }
+
+.shell-main {
+  flex: 1;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 38px 32px 66px;
+}
+.hero { max-width: 790px; }
+.eyebrow {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 10px; font-weight: 750;
+  letter-spacing: .16em;
+  color: #7f8a99;
+}
+.eyebrow::before { content: ""; width: 24px; height: 1px; background: #c4cedb; }
+h1 {
+  margin: 18px 0 18px;
+  font-size: clamp(38px, 5vw, 58px);
+  line-height: 1.08;
+  letter-spacing: -.035em;
+  font-weight: 750;
+}
+h1 em { font-style: normal; color: var(--accent); }
+.lede {
+  max-width: 610px;
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.9;
+  color: var(--muted);
+}
+.hero-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.hero-meta span {
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .66);
+  font-size: 10px;
+  color: #5f6b7a;
+}
+
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 44px; }
+.page-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 292px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .88);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+  text-decoration: none;
+  color: inherit;
+  transition: transform .18s, border-color .18s, box-shadow .18s;
+}
+.page-card:hover {
+  transform: translateY(-3px);
+  border-color: #b8d6ff;
+  box-shadow: 0 24px 50px -26px rgba(11, 132, 255, .38);
+}
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.card-num { font: 10px/1.4 Consolas, "Cascadia Mono", monospace; letter-spacing: .08em; color: var(--faint); }
+.card-icon {
+  width: 42px; height: 42px;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  background: #eef6ff;
+  color: var(--accent);
+}
+.page-card h2 { margin: 26px 0 8px; font-size: 26px; letter-spacing: -.02em; font-weight: 700; }
+.page-card p { max-width: 430px; margin: 0; font-size: 12.5px; line-height: 1.85; color: var(--muted); }
+.card-link {
+  margin-top: auto;
+  padding-top: 22px;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 650;
+  color: var(--accent);
+}
+.card-link span { transition: transform .18s; }
+.page-card:hover .card-link span { transform: translateX(3px); }
+
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 18px;
+  padding: 18px 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .78);
+}
+.status-eyebrow { font-size: 9px; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+.status-title { margin-top: 4px; font-size: 16px; font-weight: 700; }
+.status-meta { margin-top: 3px; font-size: 10.5px; color: var(--muted); }
+.status-stats { display: flex; flex-wrap: wrap; gap: 22px; justify-content: flex-end; }
+.status-stats span { display: flex; flex-direction: column; gap: 2px; font-size: 9.5px; color: var(--faint); }
+.status-stats b { font-size: 15px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.shell-foot {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 18px 32px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid rgba(15, 23, 42, .05);
+  font-size: 9.5px;
+  color: var(--faint);
+}
+
+@media (max-width: 860px) {
+  .shell-top { padding: 18px 20px; }
+  .shell-main { padding: 24px 20px 46px; }
+  .cards { grid-template-columns: 1fr; margin-top: 32px; }
+  .page-card { min-height: 250px; }
+  .status { flex-direction: column; align-items: flex-start; }
+  .status-stats { justify-content: flex-start; gap: 18px; }
+  .shell-foot { padding: 16px 20px 22px; flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+@media (max-width: 520px) {
+  h1 { font-size: 34px; }
+  .lede { font-size: 13px; }
+  .pill { display: none; }
+  .page-card { padding: 20px; }
+  .page-card h2 { font-size: 23px; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="shell-top">
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="21" height="21" fill="none">
+        <path d="M4 6.2A2.2 2.2 0 0 1 6.2 4h11.6A2.2 2.2 0 0 1 20 6.2v7.6a2.2 2.2 0 0 1-2.2 2.2H10l-4.6 3.1a.6.6 0 0 1-.94-.5V16H6.2A2.2 2.2 0 0 1 4 13.8V6.2Z" fill="currentColor"/>
+        <circle cx="8.6" cy="9.8" r="1.1" fill="#0b84ff"/>
+        <circle cx="12" cy="9.8" r="1.1" fill="#0b84ff"/>
+        <circle cx="15.4" cy="9.8" r="1.1" fill="#0b84ff"/>
+      </svg>
+    </span>
+    <span class="brand-text">
+      <span class="brand-name" data-zh="聊天记录工坊" data-en="Chatlog Studio">聊天记录工坊</span>
+      <span class="brand-sub" data-zh="Chatlog Studio" data-en="Local chat composer">Chatlog Studio</span>
+    </span>
+  </a>
+  <div class="shell-actions">
+    <span class="pill"><span class="pill-dot"></span><span data-zh="纯本地 · OneBot 12" data-en="Fully local · OneBot 12">纯本地 · OneBot 12</span></span>
+    <div class="lang-seg" role="group" data-zh-aria="语言" data-en-aria="Language" aria-label="语言">
+      <button type="button" data-action="set-lang" data-lang="zh">中文</button>
+      <button type="button" data-action="set-lang" data-lang="en">English</button>
+    </div>
+  </div>
+</header>
+
+<main class="shell-main">
+  <section class="hero">
+    <div class="eyebrow">CHATLOG STUDIO / 01</div>
+    <h1><span data-zh="把一段对话，" data-en="Turn a conversation">把一段对话，</span><br><em data-zh="排成一张聊天记录。" data-en="into a chat log.">排成一张聊天记录。</em></h1>
+    <p class="lede" data-zh="选好角色，直接打字编排；需要图片、表情、语音或引用时，再打开详细编辑。所有角色、消息和素材只留在本机浏览器里，最后导出成 PNG。" data-en="Pick a character and just type; open the detailed editor when you need images, faces, voice or quotes. Every character, message and asset stays in this browser, and you export the result as a PNG.">选好角色，直接打字编排；需要图片、表情、语音或引用时，再打开详细编辑。所有角色、消息和素材只留在本机浏览器里，最后导出成 PNG。</p>
+    <div class="hero-meta">
+      <span data-zh="纯本地存储" data-en="Local storage only">纯本地存储</span>
+      <span data-zh="OneBot 12 结构" data-en="OneBot 12 structure">OneBot 12 结构</span>
+      <span data-zh="Canvas 导出 PNG" data-en="Canvas PNG export">Canvas 导出 PNG</span>
+    </div>
+  </section>
+
+  <section class="cards">
+    <a class="page-card" href="chat.html">
+      <div class="card-top">
+        <span class="card-num">01 / CHAT</span>
+        <span class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none">
+            <path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-4 3v-3.2A2 2 0 0 1 4 14V6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M8 8h8M8 11.5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+      </div>
+      <h2 data-zh="聊天页" data-en="Chat page">聊天页</h2>
+      <p data-zh="像聊天一样直接编排：输入框左侧选角色，打字发送就是一条消息。长按输入框进入全屏详细编辑，右上角菜单打开角色池，左上角返回键打开设置侧栏。" data-en="Compose like a chat: pick a character on the left of the input, then type and send. Long-press the input for full-screen detailed editing, open the character pool from the top-right menu, and open the settings drawer with the top-left back button.">像聊天一样直接编排：输入框左侧选角色，打字发送就是一条消息。长按输入框进入全屏详细编辑，右上角菜单打开角色池，左上角返回键打开设置侧栏。</p>
+      <span class="card-link"><span data-zh="打开聊天页" data-en="Open chat page">打开聊天页</span> <span aria-hidden="true">→</span></span>
+    </a>
+
+    <a class="page-card" href="editor.html">
+      <div class="card-top">
+        <span class="card-num">02 / EDIT</span>
+        <span class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none">
+            <rect x="3.5" y="4" width="17" height="16" rx="2.2" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M3.5 9.5h17M9.5 9.5V20" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M12.5 13h5M12.5 16h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+      </div>
+      <h2 data-zh="编辑页" data-en="Editor page">编辑页</h2>
+      <p data-zh="桌面工作台：左侧是聊天页展示，右侧是角色池与详细编辑器。拖角色到聊天页可直接插入消息，点任意消息逐段编辑 OneBot 12 消息段。" data-en="Desktop workspace: the chat preview on the left, the character pool and detailed editor on the right. Drag a character into the chat to insert a message, or click any message to edit its OneBot 12 segments.">桌面工作台：左侧是聊天页展示，右侧是角色池与详细编辑器。拖角色到聊天页可直接插入消息，点任意消息逐段编辑 OneBot 12 消息段。</p>
+      <span class="card-link"><span data-zh="打开编辑页" data-en="Open editor page">打开编辑页</span> <span aria-hidden="true">→</span></span>
+    </a>
+  </section>
+
+  <section class="status" aria-live="polite">
+    <div class="status-left">
+      <div class="status-eyebrow" data-zh="当前本地记录" data-en="Current local record">当前本地记录</div>
+      <div class="status-title" id="status-title" data-zh="读取中…" data-en="Loading…">读取中…</div>
+      <div class="status-meta" id="status-meta" data-zh="数据只保存在这个浏览器里。" data-en="Data is stored only in this browser.">数据只保存在这个浏览器里。</div>
+    </div>
+    <div class="status-stats" id="status-stats"></div>
+  </section>
+</main>
+
+<footer class="shell-foot">
+  <span data-zh="聊天记录工坊 · v1.0" data-en="Chatlog Studio · v1.0">聊天记录工坊 · v1.0</span>
+  <span data-zh="数据不上传 · 换浏览器前请先导出 JSON 备份" data-en="Nothing is uploaded · Export a JSON backup before switching browsers">数据不上传 · 换浏览器前请先导出 JSON 备份</span>
+</footer>
+
+<script>
+/* i18n.js — tiny dependency-free bilingual (zh / en) runtime.
+ *
+ * Usage in JS:
+ *   CM.i18n.tr('中文', 'English', { n: 3 })
+ *   CM.i18n.set('en')
+ *   CM.i18n.onChange(function (lang) { ... })
+ *
+ * Static HTML uses paired attributes, only on leaf text nodes / attributes:
+ *   <span data-zh="导出图片" data-en="Export image">导出图片</span>
+ *   <button data-zh-title="撤销" data-en-title="Undo" ...>
+ *   <input data-zh-placeholder="输入消息…" data-en-placeholder="Type a message…">
+ *   <svg data-zh-aria="聊天记录预览" data-en-aria="Chat preview">
+ *
+ * Language lookup order: localStorage (mock_chatui:lang, falling back to the
+ * legacy chatlog-mock:lang) > navigator.language (zh* -> zh, everything else
+ * -> en). An English browser starts in English.
+ */
+(function () {
+  'use strict';
+
+  const CM = (window.CM = window.CM || {});
+  const KEY = 'mock_chatui:lang';
+  const LEGACY_KEY = 'chatlog-mock:lang';
+  const LANGS = ['zh', 'en'];
+  const listeners = [];
+
+  function normalize(value) {
+    return LANGS.indexOf(value) >= 0 ? value : '';
+  }
+
+  function stored() {
+    try {
+      const current = normalize(localStorage.getItem(KEY));
+      if (current) return current;
+      const legacy = normalize(localStorage.getItem(LEGACY_KEY));
+      if (legacy) {
+        try {
+          localStorage.setItem(KEY, legacy);
+        } catch (e) {}
+        return legacy;
+      }
+      return '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function detect() {
+    const saved = stored();
+    if (saved) return saved;
+    let nav = '';
+    try {
+      nav = String(navigator.language || navigator.userLanguage || '').toLowerCase();
+    } catch (e) {}
+    if (nav.indexOf('zh') === 0) return 'zh';
+    if (nav) return 'en';
+    return 'zh';
+  }
+
+  let lang = detect();
+
+  function tr(zh, en, vars) {
+    let text = lang === 'en' ? (en == null ? zh : en) : zh == null ? en : zh;
+    if (text == null) text = '';
+    if (vars) {
+      text = String(text).replace(/\{(\w+)\}/g, function (match, key) {
+        return Object.prototype.hasOwnProperty.call(vars, key) ? String(vars[key]) : match;
+      });
+    }
+    return String(text);
+  }
+
+  /** Apply data-zh / data-en pairs to static markup. Safe to call repeatedly. */
+  function apply(root) {
+    const scope = root || document;
+    if (!scope || !scope.querySelectorAll) return;
+
+    // Leaf text only: containers that own child elements are left alone, so
+    // icons / nested markup inside a translated label are never destroyed.
+    scope.querySelectorAll('[data-zh]').forEach(function (el) {
+      if (el.childElementCount > 0) return;
+      const value = el.getAttribute('data-' + lang);
+      if (value != null) el.textContent = value;
+    });
+
+    // Paired attributes: data-zh-title, data-zh-aria, data-zh-placeholder, ...
+    scope.querySelectorAll('*').forEach(function (el) {
+      const attrs = el.attributes;
+      if (!attrs || !attrs.length) return;
+      for (let i = 0; i < attrs.length; i++) {
+        const name = attrs[i].name;
+        if (name.indexOf('data-zh-') !== 0) continue;
+        const suffix = name.slice('data-zh-'.length);
+        const target = suffix === 'aria' ? 'aria-label' : suffix;
+        const value = el.getAttribute('data-' + lang + '-' + suffix);
+        if (value != null) el.setAttribute(target, value);
+      }
+    });
+
+    // Highlight the active language button everywhere (shell + settings drawer).
+    const buttons = document.querySelectorAll('[data-lang]');
+    for (let i = 0; i < buttons.length; i++) {
+      buttons[i].classList.toggle('active', buttons[i].getAttribute('data-lang') === lang);
+    }
+
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  }
+
+  function applyActive() {
+    const buttons = document.querySelectorAll('[data-lang]');
+    for (let i = 0; i < buttons.length; i++) {
+      buttons[i].classList.toggle('active', buttons[i].getAttribute('data-lang') === lang);
+    }
+  }
+
+  function persist(next) {
+    try {
+      localStorage.setItem(KEY, next);
+    } catch (e) {}
+  }
+
+  function set(next) {
+    next = normalize(next);
+    if (!next) return lang;
+    if (next === lang) {
+      applyActive();
+      return lang;
+    }
+    lang = next;
+    persist(lang);
+    apply();
+    listeners.slice().forEach(function (fn) {
+      try {
+        fn(lang);
+      } catch (e) {
+        if (window.console && console.error) console.error('[i18n] listener failed', e);
+      }
+    });
+    // Listeners may have re-rendered dynamic UI (e.g. the settings drawer):
+    // refresh active states for the new buttons without re-applying static
+    // text over values those listeners just rendered.
+    applyActive();
+    return lang;
+  }
+
+  function onChange(fn) {
+    if (typeof fn !== 'function') return function () {};
+    listeners.push(fn);
+    return function () {
+      const i = listeners.indexOf(fn);
+      if (i >= 0) listeners.splice(i, 1);
+    };
+  }
+
+  CM.i18n = {
+    KEY: KEY,
+    get lang() {
+      return lang;
+    },
+    get locale() {
+      return lang === 'zh' ? 'zh-CN' : 'en';
+    },
+    isZh: function () {
+      return lang === 'zh';
+    },
+    get: function () {
+      return lang;
+    },
+    set: set,
+    tr: tr,
+    apply: apply,
+    onChange: onChange
+  };
+
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+  if (document.readyState === 'loading') {
+    // Scripts sit at the end of <body>, so the static markup above is already
+    // available: apply right away to avoid a flash of the other language.
+    if (document.body) apply();
+    document.addEventListener('DOMContentLoaded', function () {
+      apply();
+    });
+  } else {
+    apply();
+  }
+})();
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var tr = function (zh, en, vars) { return CM.i18n.tr(zh, en, vars); };
+  var KEY = 'mock_chatui:dataset:v1';
+  var LEGACY_KEY = 'chatlog-mock:dataset:v1';
+  var data = null;
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (!raw) raw = localStorage.getItem(LEGACY_KEY);
+    if (raw) {
+      if (!localStorage.getItem(KEY)) {
+        try { localStorage.setItem(KEY, raw); } catch (e) {}
+      }
+      data = JSON.parse(raw);
+    }
+  } catch (e) {}
+
+  function fmtBytes(n) {
+    if (!n) return '—';
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1024 / 1024).toFixed(2) + ' MB';
+  }
+  function fmtDate(v) {
+    if (!v) return tr('未知', 'Unknown');
+    var d = new Date(v);
+    if (isNaN(d.getTime())) return tr('未知', 'Unknown');
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') +
+      ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  function renderStatus() {
+    var title = document.getElementById('status-title');
+    var meta = document.getElementById('status-meta');
+    var stats = document.getElementById('status-stats');
+    if (!title || !meta || !stats) return;
+
+    if (!data || !Array.isArray(data.sessions) || !data.sessions.length) {
+      title.textContent = tr('还没有本地记录', 'No local records yet');
+      meta.textContent = tr(
+        '打开任一页面，会自动生成一份示例聊天记录；之后所有修改都会保存在本机。',
+        'Open either page to generate a demo chat log automatically; all changes are then saved on this device.'
+      );
+      stats.innerHTML = '';
+      return;
+    }
+
+    var messages = 0;
+    var events = 0;
+    data.sessions.forEach(function (s) {
+      var list = s.events || [];
+      events += list.length;
+      list.forEach(function (e) {
+        if (e.type === 'message') messages++;
+      });
+    });
+    var chars = (data.characters || []).length;
+    var bytes = 0;
+    try {
+      bytes = new Blob([JSON.stringify(data)]).size;
+    } catch (e) {}
+
+    if (data.sessions.length === 1) {
+      title.textContent = data.sessions[0].title || tr('未命名会话', 'Untitled chat');
+    } else {
+      title.textContent = tr('共 {n} 个会话', '{n} sessions', { n: data.sessions.length });
+    }
+    var type = data.settings && data.settings.platform === 'wechat'
+      ? tr('微信样式', 'WeChat style')
+      : tr('QQ 样式', 'QQ style');
+    meta.textContent = type + ' · ' + tr('最后修改 {time}', 'Last modified {time}', { time: fmtDate(data.updatedAt) });
+    stats.innerHTML =
+      '<span><b>' + messages + '</b> ' + tr('条消息', 'messages') + '</span>' +
+      '<span><b>' + events + '</b> ' + tr('个事件', 'events') + '</span>' +
+      '<span><b>' + chars + '</b> ' + tr('个角色', 'characters') + '</span>' +
+      '<span><b>' + fmtBytes(bytes) + '</b> ' + tr('本地占用', 'storage used') + '</span>';
+  }
+
+  renderStatus();
+  document.addEventListener('DOMContentLoaded', function () {
+    // i18n applies static markup on DOMContentLoaded; refresh dynamic status
+    // afterwards so its data-zh/data-en placeholders do not win.
+    CM.i18n.apply();
+    renderStatus();
+  });
+  CM.i18n.onChange(function () {
+    CM.i18n.apply();
+    renderStatus();
+  });
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-action="set-lang"]');
+    if (btn) CM.i18n.set(btn.getAttribute('data-lang'));
+  });
+})();
+</script>
+</body>
+</html>
