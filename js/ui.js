@@ -30,6 +30,10 @@
     exportInfo: null,
     longPressTimer: 0,
     longPressStart: null,
+    ctx: null,
+    ctxPrevFocus: null,
+    ctxOpenedAt: 0,
+    hold: null,
   };
 
   document.addEventListener('DOMContentLoaded', init);
@@ -56,6 +60,7 @@
   /** Re-render every dynamic surface after a zh/en switch. Static markup is
       handled by CM.i18n.apply(); here we rebuild templates and open dialogs. */
   function onLanguageChange() {
+    closeContextMenu();
     renderAll();
     if (S.saveStatus) onSaveStatus(S.saveStatus);
     if (S.modalKind === 'export') {
@@ -652,6 +657,7 @@
   /* ------------------------------------------------------------------ */
 
   function openDrawer() {
+    closeContextMenu();
     hideRolePop();
     document.body.classList.add('drawer-open');
     renderDrawer();
@@ -997,6 +1003,7 @@
   }
 
   function openDetailSheet() {
+    closeContextMenu();
     if (!OVERLAY()) return;
     document.body.classList.remove('pool-open');
     document.body.classList.add('detail-open');
@@ -1011,6 +1018,7 @@
   }
 
   function openPool() {
+    closeContextMenu();
     hideRolePop();
     if (!OVERLAY()) {
       const p = $('#pool-panel');
@@ -1743,11 +1751,349 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* context menu (right click + long press)                             */
+  /* ------------------------------------------------------------------ */
+
+  const CTX_SHEET = () => window.matchMedia('(max-width: 760px)').matches;
+
+  function previewEventAt(clientY) {
+    const canvas = $('#preview-canvas');
+    const layout = S.previewLayout;
+    if (!canvas || !layout) return null;
+    const rect = canvas.getBoundingClientRect();
+    const y = ((clientY - rect.top) / Math.max(1, rect.height)) * layout.height;
+    return layout.items.find((i) => i.eventId && y >= i.y && y <= i.y + i.h) || null;
+  }
+
+  function ctxItemHTML(action, icon, label, opts) {
+    const o = opts || {};
+    return `<button type="button" class="ctx-item${o.danger ? ' danger' : ''}" role="menuitem" data-ctx-action="${action}"${o.disabled ? ' disabled' : ''}${o.title ? ` title="${esc(o.title)}"` : ''}><span class="ctx-ico" aria-hidden="true">${icon}</span><span class="ctx-label">${esc(label)}</span></button>`;
+  }
+
+  function ensureContextMenu() {
+    let menu = $('#ctx-menu');
+    let back = $('#ctx-backdrop');
+    if (!menu) {
+      menu = document.createElement('div');
+      menu.id = 'ctx-menu';
+      menu.className = 'ctx-menu';
+      menu.hidden = true;
+      menu.setAttribute('role', 'menu');
+      menu.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(menu);
+      menu.addEventListener('click', (e) => {
+        const item = e.target.closest('[data-ctx-action]');
+        if (!item || item.disabled) return;
+        e.preventDefault();
+        runContextAction(item.dataset.ctxAction);
+      });
+      menu.addEventListener('keydown', (e) => {
+        if (!S.ctx) return;
+        const items = $$('#ctx-menu .ctx-item:not(:disabled)');
+        if (!items.length) return;
+        const i = items.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          items[(i + 1) % items.length].focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          items[(i - 1 + items.length) % items.length].focus();
+        }
+      });
+    }
+    if (!back) {
+      back = document.createElement('div');
+      back.id = 'ctx-backdrop';
+      back.className = 'ctx-backdrop';
+      back.hidden = true;
+      back.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(back);
+      back.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        closeContextMenu();
+      });
+    }
+    return menu;
+  }
+
+  function renderContextMenu() {
+    const ctx = S.ctx;
+    if (!ctx) return;
+    const menu = ensureContextMenu();
+    const d = D();
+    if (ctx.kind === 'event') {
+      const s = session();
+      const ev = (s.events || []).find((e) => e.id === ctx.id);
+      if (!ev) {
+        S.ctx = null;
+        return;
+      }
+      const idx = s.events.indexOf(ev);
+      const notice = ev.type !== 'message';
+      const ch = notice ? null : CM.charOf(d, ev.user_id);
+      const who = notice ? tr('系统提示', 'System notice') : CM.charName(d, ev.user_id);
+      const text = notice ? CM.noticeText(d, ev) : CM.altMessage(ev.message, d);
+      const kind = notice ? tr('通知', 'Notice') : tr('消息', 'Message');
+      const canCopy = !!(text && String(text).trim());
+      const av = notice
+        ? `<span class="ctx-avatar notice" aria-hidden="true">⌁</span>`
+        : `<span class="ctx-avatar" style="background:${esc(ch ? ch.color : '#93b4ff')}" aria-hidden="true">${avatarHTML(ch)}</span>`;
+      menu.innerHTML =
+        `<div class="ctx-head">${av}<div class="ctx-head-main"><div class="ctx-title">${esc(who)}</div><div class="ctx-sub">${esc(CM.fmtClock(ev.time))} · ${esc(kind)}${canCopy ? ` · ${esc(text)}` : ''}</div></div></div>` +
+        ctxItemHTML('edit', '✎', tr('详细编辑', 'Edit details')) +
+        ctxItemHTML('copy', '⧉', tr('复制文本', 'Copy text'), { disabled: !canCopy }) +
+        ctxItemHTML('duplicate', '＋', tr('复制', 'Duplicate')) +
+        `<div class="ctx-sep"></div>` +
+        ctxItemHTML('up', '↑', tr('上移', 'Move up'), { disabled: idx <= 0 }) +
+        ctxItemHTML('down', '↓', tr('下移', 'Move down'), { disabled: idx >= s.events.length - 1 }) +
+        `<div class="ctx-sep"></div>` +
+        ctxItemHTML('delete', '×', notice ? tr('删除通知', 'Delete notice') : tr('删除消息', 'Delete message'), { danger: true });
+    } else if (ctx.kind === 'character') {
+      const ch = CM.charOf(d, ctx.uid);
+      if (!ch) {
+        S.ctx = null;
+        return;
+      }
+      const s = session();
+      const canSend = allowedChars(s).some((c) => String(c.user_id) === String(ctx.uid));
+      const isSelf = String(ctx.uid) === String(CM.selfId(d));
+      const refs = countCharRefs(d, ctx.uid);
+      const av = `<span class="ctx-avatar" style="background:${esc(ch.color)}" aria-hidden="true">${avatarHTML(ch)}</span>`;
+      const delTitle = isSelf
+        ? tr('本人角色不能删除', 'The self character cannot be deleted')
+        : refs > 0
+          ? tr('仍被 {n} 处引用，不能删除', 'Referenced {n} times; cannot delete', { n: refs })
+          : '';
+      menu.innerHTML =
+        `<div class="ctx-head">${av}<div class="ctx-head-main"><div class="ctx-title">${esc(ch.name)}</div><div class="ctx-sub">#${esc(ch.user_id)}${isSelf ? ' · ' + esc(tr('本人', 'You')) : ''}</div></div></div>` +
+        ctxItemHTML('sender', '✓', tr('设为发送身份', 'Set as sender'), {
+          disabled: !canSend,
+          title: canSend ? '' : tr('私聊只能由本人或聊天对象发送', 'In a private chat, only you or the peer can send'),
+        }) +
+        ctxItemHTML('insert', '＋', tr('插入一条消息', 'Insert message'), { disabled: !canSend }) +
+        `<div class="ctx-sep"></div>` +
+        ctxItemHTML('char-edit', '✎', tr('编辑角色', 'Edit character')) +
+        ctxItemHTML('char-delete', '×', tr('删除角色', 'Delete character'), {
+          danger: true,
+          title: delTitle,
+        });
+    }
+    menu.setAttribute('aria-label', tr('操作', 'Actions'));
+  }
+
+  function showContextMenu(x, y) {
+    const menu = ensureContextMenu();
+    const back = $('#ctx-backdrop');
+    const sheet = CTX_SHEET();
+    menu.hidden = false;
+    menu.setAttribute('aria-hidden', 'false');
+    if (back) back.hidden = !sheet;
+    document.body.classList.add('ctx-open');
+    menu.style.left = '';
+    menu.style.top = '';
+    if (!sheet) {
+      const pad = 8;
+      const w = menu.offsetWidth;
+      const h = menu.offsetHeight;
+      menu.style.left = Math.max(pad, Math.min(x, window.innerWidth - w - pad)) + 'px';
+      menu.style.top = Math.max(pad, Math.min(y, window.innerHeight - h - pad)) + 'px';
+    }
+    S.ctxOpenedAt = Date.now();
+    const first = menu.querySelector('.ctx-item:not(:disabled)');
+    if (first) {
+      try {
+        first.focus({ preventScroll: true });
+      } catch (e) {
+        first.focus();
+      }
+    }
+  }
+
+  function openEventMenu(id, x, y) {
+    if (!id) return;
+    if (S.ctx && S.ctx.kind === 'event' && S.ctx.id === String(id) && Date.now() - S.ctxOpenedAt < 600) return;
+    S.ctx = { kind: 'event', id: String(id) };
+    S.ctxPrevFocus = document.activeElement;
+    renderContextMenu();
+    if (!S.ctx) return;
+    showContextMenu(x, y);
+  }
+
+  function openCharacterMenu(uid, x, y) {
+    if (!uid) return;
+    if (S.ctx && S.ctx.kind === 'character' && S.ctx.uid === String(uid) && Date.now() - S.ctxOpenedAt < 600) return;
+    S.ctx = { kind: 'character', uid: String(uid) };
+    S.ctxPrevFocus = document.activeElement;
+    renderContextMenu();
+    if (!S.ctx) return;
+    showContextMenu(x, y);
+  }
+
+  function closeContextMenu() {
+    const menu = $('#ctx-menu');
+    const back = $('#ctx-backdrop');
+    if (!S.ctx && (!menu || menu.hidden)) return;
+    if (menu) {
+      menu.hidden = true;
+      menu.setAttribute('aria-hidden', 'true');
+    }
+    if (back) back.hidden = true;
+    document.body.classList.remove('ctx-open');
+    S.ctx = null;
+    const prev = S.ctxPrevFocus;
+    S.ctxPrevFocus = null;
+    if (prev && prev.focus && document.contains(prev)) {
+      try {
+        prev.focus({ preventScroll: true });
+      } catch (e) {}
+    }
+  }
+
+  function selectForMenu(id) {
+    if (S.selectedId === id) return;
+    S.selectedId = id;
+    renderDetail();
+    renderPreview();
+  }
+
+  function eventPlainText(ev) {
+    if (!ev) return '';
+    return ev.type === 'message' ? CM.altMessage(ev.message, D()) || '' : CM.noticeText(D(), ev) || '';
+  }
+
+  function fallbackCopy(value, done) {
+    const ta = document.createElement('textarea');
+    ta.value = value;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    ta.style.pointerEvents = 'none';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try {
+      ok = document.execCommand('copy');
+    } catch (e) {}
+    ta.remove();
+    if (ok) done();
+    else toast(tr('复制失败', 'Copy failed'), true);
+  }
+
+  function copyPlainText(text) {
+    const value = String(text || '').trim();
+    if (!value) {
+      toast(tr('没有可复制的文本', 'No text to copy'), true);
+      return;
+    }
+    const done = () => toast(tr('已复制文本', 'Text copied'));
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(value).then(done, () => fallbackCopy(value, done));
+    } else {
+      fallbackCopy(value, done);
+    }
+  }
+
+  function runContextAction(action) {
+    const ctx = S.ctx;
+    if (!ctx) return;
+    closeContextMenu();
+    if (ctx.kind === 'event') {
+      const ev = (session().events || []).find((e) => e.id === ctx.id);
+      if (!ev) return;
+      if (action === 'edit') {
+        selectEvent(ctx.id, false);
+        return;
+      }
+      if (action === 'copy') {
+        copyPlainText(eventPlainText(ev));
+        return;
+      }
+      selectForMenu(ctx.id);
+      if (action === 'duplicate') duplicateEvent();
+      else if (action === 'up') moveEvent(ctx.id, -1);
+      else if (action === 'down') moveEvent(ctx.id, 1);
+      else if (action === 'delete') deleteEvent();
+      return;
+    }
+    if (ctx.kind === 'character') {
+      if (action === 'sender') {
+        if (pickRole(ctx.uid) && OVERLAY()) closePool();
+      } else if (action === 'insert') {
+        insertMessageAt(session().events.length, ctx.uid);
+      } else if (action === 'char-edit') {
+        openCharacterModal(ctx.uid, false);
+      } else if (action === 'char-delete') {
+        deleteCharacter(ctx.uid);
+      }
+    }
+  }
+
+  function startHold(e) {
+    if (S.ctx) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    let kind = '';
+    let id = '';
+    let uid = '';
+    const canvas = e.target.closest ? e.target.closest('#preview-canvas') : null;
+    if (canvas) {
+      const item = previewEventAt(e.clientY);
+      if (!item) return;
+      kind = 'event';
+      id = item.eventId;
+    } else {
+      const row = e.target.closest ? e.target.closest('.flow-row[data-eid]') : null;
+      if (row) {
+        kind = 'event';
+        id = row.dataset.eid;
+      } else {
+        const card = e.target.closest ? e.target.closest('.pool-card[data-uid]') : null;
+        if (card) {
+          kind = 'character';
+          uid = card.dataset.uid;
+        }
+      }
+    }
+    if (!kind) return;
+    clearHold();
+    S.hold = {
+      x: e.clientX,
+      y: e.clientY,
+      kind,
+      id,
+      uid,
+      timer: setTimeout(() => {
+        const h = S.hold;
+        if (!h) return;
+        S.hold = null;
+        S.suppressClickAt = Date.now();
+        if (h.kind === 'event') openEventMenu(h.id, h.x, h.y);
+        else openCharacterMenu(h.uid, h.x, h.y);
+      }, 520),
+    };
+  }
+
+  function clearHold() {
+    if (S.hold && S.hold.timer) clearTimeout(S.hold.timer);
+    S.hold = null;
+  }
+
+  function moveHold(e) {
+    if (!S.hold) return;
+    if (Math.abs(e.clientX - S.hold.x) > 9 || Math.abs(e.clientY - S.hold.y) > 9) clearHold();
+  }
+
+  function endHold() {
+    clearHold();
+  }
+
+  /* ------------------------------------------------------------------ */
   /* sessions                                                            */
   /* ------------------------------------------------------------------ */
 
   function selectSession(id) {
     if (!D().sessions.some((s) => s.id === id)) return;
+    closeContextMenu();
     cleanupFreshEmpty();
     hideRolePop();
     S.sessionId = id;
@@ -2713,6 +3059,7 @@
 
   function bind() {
     document.addEventListener('click', (e) => {
+      if (Date.now() - S.suppressClickAt < 420) return;
       const el = e.target.closest('[data-action]');
       if (!el) return;
       const action = el.dataset.action;
@@ -2729,6 +3076,47 @@
       if (e.target.closest('#role-pop') || e.target.closest('#role-btn')) return;
       hideRolePop();
     });
+
+    document.addEventListener('contextmenu', (e) => {
+      if (e.target.closest && e.target.closest('#ctx-menu')) {
+        e.preventDefault();
+        return;
+      }
+      const canvas = e.target.closest ? e.target.closest('#preview-canvas') : null;
+      if (canvas) {
+        const item = previewEventAt(e.clientY);
+        if (item) {
+          e.preventDefault();
+          openEventMenu(item.eventId, e.clientX, e.clientY);
+        }
+        return;
+      }
+      const row = e.target.closest ? e.target.closest('.flow-row[data-eid]') : null;
+      if (row) {
+        e.preventDefault();
+        openEventMenu(row.dataset.eid, e.clientX, e.clientY);
+        return;
+      }
+      const card = e.target.closest ? e.target.closest('.pool-card[data-uid]') : null;
+      if (card) {
+        e.preventDefault();
+        openCharacterMenu(card.dataset.uid, e.clientX, e.clientY);
+      }
+    });
+
+    document.addEventListener(
+      'pointerdown',
+      (e) => {
+        if (!S.ctx) return;
+        if (e.target.closest && e.target.closest('#ctx-menu')) return;
+        closeContextMenu();
+      },
+      true
+    );
+    document.addEventListener('pointerdown', startHold);
+    document.addEventListener('pointermove', moveHold);
+    document.addEventListener('pointerup', endHold);
+    document.addEventListener('pointercancel', endHold);
 
     document.addEventListener('input', (e) => {
       if (e.target.id === 'composer-input') return;
@@ -2767,6 +3155,13 @@
     });
 
     document.addEventListener('keydown', (e) => {
+      if (S.ctx) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeContextMenu();
+        }
+        return;
+      }
       const editable = e.target && e.target.matches && e.target.matches('input, textarea, select, [contenteditable="true"]');
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !editable) {
         e.preventDefault();
@@ -2813,6 +3208,7 @@
     const canvas = $('#preview-canvas');
     if (canvas) {
       canvas.addEventListener('click', (e) => {
+        if (Date.now() - S.suppressClickAt < 420) return;
         const layout = S.previewLayout;
         if (!layout) return;
         const rect = canvas.getBoundingClientRect();
@@ -2849,7 +3245,11 @@
       input.addEventListener('pointerup', cancelLongPress);
       input.addEventListener('pointercancel', cancelLongPress);
       input.addEventListener('pointerleave', cancelLongPress);
-      input.addEventListener('contextmenu', (e) => e.preventDefault());
+      input.addEventListener('contextmenu', (e) => {
+        // Keep the native text menu on a mouse; suppress it on touch, where
+        // the long-press gesture opens the detailed editor instead.
+        if (window.matchMedia('(pointer: coarse)').matches) e.preventDefault();
+      });
     }
 
     const screen = $('#phone-screen');
@@ -2898,6 +3298,7 @@
       cleanupDrag();
     });
 
+    window.addEventListener('resize', closeContextMenu);
     window.addEventListener('resize', CM.debounce(() => renderPreview(), 140));
   }
 })();
